@@ -1,0 +1,41 @@
+name: Webpage Image Downloader
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "URL to download images from"
+        required: true
+        default: "https://example.com"
+  schedule:
+    # runs every day at 06:00 UTC â€” edit as needed
+    - cron: "0 6 * * *"
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Run downloader
+        run: |
+          python download_images.py "${{ github.event.inputs.target_url || 'https://example.com' }}"
+
+      - name: Commit downloaded images
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add downloads/
+          git diff --cached --quiet || git commit -m "Add downloaded images $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
