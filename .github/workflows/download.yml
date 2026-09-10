@@ -11,6 +11,9 @@ on:
     # runs every day at 06:00 UTC â€” edit as needed
     - cron: "0 6 * * *"
 
+permissions:
+  contents: write
+
 jobs:
   download:
     runs-on: ubuntu-latest
